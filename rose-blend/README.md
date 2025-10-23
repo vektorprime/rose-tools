@@ -1,3 +1,5 @@
+UPDATED FOR BLENDER 4.5
+
 # RoseBlend
 A [Blender](https://blender.org) add-on for importing ROSE Online 3D assets
 
