@@ -36,8 +36,8 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
         obj = bpy.data.objects.new(filename, mesh)
         
         scene = context.scene
-        scene.objects.link(obj)
-        scene.update()
+        context.collection.objects.link(obj)
+        #scene.update()
 
         return {"FINISHED"}
 
@@ -59,13 +59,13 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
 
         #-- UV
         if zms.uv1_enabled():
-            mesh.uv_textures.new(name="uv1")
+            mesh.uv_layers.new(name="uv1")
         if zms.uv2_enabled():
-            mesh.uv_textures.new(name="uv2")
+            mesh.uv_layers.new(name="uv2")
         if zms.uv3_enabled():
-            mesh.uv_textures.new(name="uv3")
+            mesh.uv_layers.new(name="uv3")
         if zms.uv4_enabled():
-            mesh.uv_textures.new(name="uv4")
+            mesh.uv_layers.new(name="uv4")
 
         for loop_idx, loop in enumerate(mesh.loops):
             vi = loop.vertex_index
@@ -80,7 +80,7 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
         mat.use_nodes = True
 
         nodes = mat.node_tree.nodes
-        mat_node = nodes["Diffuse BSDF"]
+        mat_node = nodes["Principled BSDF"]
         tex_node = nodes.new(type="ShaderNodeTexImage")
 
         if self.load_texture:
@@ -95,7 +95,8 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
                 tex_node.image = image
 
         links = mat.node_tree.links
-        links.new(mat_node.inputs["Color"], tex_node.outputs["Color"])
+        #links.new(mat_node.inputs["Base Color"], tex_node.outputs["Color"])
+        links.new(tex_node.outputs["Color"], mat_node.inputs["Base Color"])
         mesh.materials.append(mat)
 
         mesh.update(calc_edges=True)
