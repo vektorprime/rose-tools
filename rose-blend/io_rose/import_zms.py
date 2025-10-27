@@ -15,8 +15,8 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
     bl_label = "ROSE Mesh (.zms)"
     bl_options = {"PRESET"}
 
-    filename_ext = ".zms"
-    filter_glob = StringProperty(default="*.zms", options={"HIDDEN"})
+    filename_ext = ".ZMS"
+    filter_glob = StringProperty(default="*.ZMS", options={"HIDDEN"})
     load_texture = BoolProperty(
         name = "Load texture",
         description = ( "Automatically detect and load a texture if "
@@ -31,10 +31,51 @@ class ImportZMS(bpy.types.Operator, ImportHelper):
         filename = filepath.stem
         zms = ZMS(str(filepath))
 
+        # Debug logging
+        print(f"=== ZMS Import Debug ===")
+        print(f"Identifier: {zms.identifier}")
+        print(f"Flags: {zms.flags}")
+        print(f"Vertices: {len(zms.vertices)}")
+        print(f"Indices: {len(zms.indices)}")
+        print(f"Bones: {zms.bones}")
+        print(f"Materials: {zms.materials}")
+        print(f"Strips: {zms.strips}")
+        print(f"Pool: {zms.pool}")
+        print(f"Bounding Box Min: {zms.bounding_box_min}")
+        print(f"Bounding Box Max: {zms.bounding_box_max}")
+        print(f"=======================")
+
         mesh = self.mesh_from_zms(zms, filename)
 
         obj = bpy.data.objects.new(filename, mesh)
-        
+
+        # --- Create vertex groups and assign weights so exporter can detect bone data ---
+        # Create one Blender vertex group per ZMS bone entry (order matters)
+        if len(zms.bones) > 0:
+            for i, bone in enumerate(zms.bones):
+                # name groups deterministically; exporter relies on obj["zms_bones"] to restore mapping
+                obj.vertex_groups.new(name=f"zms_bone_{i}")
+
+            # Assign weights per vertex. mesh.from_pydata created vertices in same order as zms.vertices
+            for vi, v in enumerate(zms.vertices):
+                # bone_weights and bone_indices are lists of length 4
+                for gi in range(4):
+                    try:
+                        weight = v.bone_weights[gi]
+                        group_index = int(v.bone_indices[gi])
+                    except Exception:
+                        continue
+
+                    if weight and weight > 0.0 and 0 <= group_index < len(zms.bones):
+                        # Add weight to that group for this vertex
+                        obj.vertex_groups[group_index].add([vi], weight, 'REPLACE')
+
+        # Store ZMS metadata on the object for later export
+        obj["zms_materials"] = str(zms.materials)
+        obj["zms_strips"] = str(zms.strips)
+        obj["zms_pool"] = zms.pool
+        obj["zms_bones"] = str(zms.bones)
+
         scene = context.scene
         context.collection.objects.link(obj)
         #scene.update()
