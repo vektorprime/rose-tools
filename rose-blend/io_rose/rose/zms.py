@@ -2,24 +2,24 @@ from enum import IntEnum
 from .utils import *
 
 class VertexFlags(IntEnum):
-    POSITION = 1 << 1,
-    NORMAL = 1 << 2,
-    COLOR = 1 << 3,
-    BONE_WEIGHT = 1 << 4, 
-    BONE_INDEX = 1 << 5, 
-    TANGENT = 1 << 6,
-    UV1 = 1 << 7,
-    UV2 = 1 << 8,
-    UV3 = 1 << 9,
-    UV4 = 1 << 10,
+    POSITION = 2
+    NORMAL = 4  
+    COLOR = 8
+    BONE_INDEX = 16
+    BONE_WEIGHT = 32
+    TANGENT = 64
+    UV1 = 128
+    UV2 = 256
+    UV3 = 512
+    UV4 = 1024
 
 class Vertex:
     def __init__(self):
         self.position = Vector3()
         self.normal = Vector3()
         self.color = Color4()
-        self.bone_weights = []
-        self.bone_indices = []
+        self.bone_weights = [0.0, 0.0, 0.0, 0.0]
+        self.bone_indices = [0, 0, 0, 0]
         self.tangent = Vector3()
         self.uv1 = Vector2()
         self.uv2 = Vector2()
