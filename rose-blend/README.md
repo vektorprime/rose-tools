@@ -1,4 +1,4 @@
-UPDATED FOR BLENDER 4.5
+UPDATED FOR BLENDER 4.5. Please note I used an LLM for this as I am not familiar with 3D graphics or blender. But I can confirm it works.
 
 # RoseBlend
 A [Blender](https://blender.org) add-on for importing ROSE Online 3D assets
